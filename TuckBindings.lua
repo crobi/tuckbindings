@@ -10,6 +10,7 @@ local ERROR = function(msg) ChatFrame1:AddMessage(msg) end
   Global variables
 ]]
 TuckBindings = {btn_count = 0, buttons = {} }
+local TB = TuckBindings
 
 --[[
   Converts the input into a table
@@ -26,66 +27,23 @@ function TuckBindings::MakeTable(input, default_value, default_key)
 	end
 end
 
---[[
-
-]]
-function TuckBindings:CreateHelpHarmButton(binding, harmspell, helpspell, selfcast, focuscast)
-	TuckBindings:CreateMacroButton(binding, "/cast [harm]"..harmspell.."; "..helpspell)
-	
-	if (selfcast) then
-		TuckBindings:CreateMacroButton("SHIFT-"..binding, "/cast [@player] "..helpspell)
-	end
-	
-	if (focuscast) then
-		TuckBindings:CreateMacroButton("CTRL-"..binding, "/cast [@focus, harm] "..harmspell.."; [@focus] "..helpspell)
-	end
-end
-
---[[
-
-]]
-function TuckBindings:CreateHelpButton(binding, spell, target2, selfcast)
-	if (target2) then
-		TuckBindings:CreateMacroButton(binding, "/cast [help]"..spell.."; [@"..target2..", help] "..spell)
-	else
-		TuckBindings:CreateMacroButton(binding, "/cast [help]"..spell)
-	end
-	
-	if (selfcast) then
-		TuckBindings:CreateMacroButton(selfcast.."-"..binding, "/cast [@player]"..spell)
-	end
-end
-
---[[
-
-]]
-function TuckBindings:CreateHarmButton(binding, spell, target2, focuscast)
-	if (target2) then
-		TuckBindings:CreateMacroButton(binding, "/cast [harm]"..spell.."; [harm, @"..target2.."] "..spell)
-	else
-		TuckBindings:CreateMacroButton(binding, "/cast [harm]"..spell)
-	end
-
-	if (focuscast) then
-        if target2 == nil then
-            target2 = "focus"
-        end
-		TuckBindings:CreateMacroButton(focuscast.."-"..binding, "/cast [@"..target2..", harm] "..spell)
-	end
-end
+Macro(binding)
+Cast(binding, condition, targets, altcast)
+CastInStance(binding, condition, targets, altcast, stances)
+CastSwitchStance(binding, condition, targets, altcast, stances)
 
 --[[
 
 ]]
 function TuckBindings:CreateStealthButton(binding, stealthspell, spell, selfcast, focuscast)
-	TuckBindings:CreateMacroButton(binding, "/cast [stealth]"..stealthspell.."; "..spell)
+	TB:CreateMacroButton(binding, "/cast [stealth]"..stealthspell.."; "..spell)
 	
 	if (selfcast) then
-		TuckBindings:CreateMacroButton("SHIFT-"..binding, "/cast [@player, stealth] "..stealthspell.."; "..spell)
+		TB:CreateMacroButton("SHIFT-"..binding, "/cast [@player, stealth] "..stealthspell.."; "..spell)
 	end
 	
 	if (focuscast) then
-		TuckBindings:CreateMacroButton("CTRL-"..binding, "/cast [@focus, stealth] "..stealthspell.."; [@focus] "..spell)
+		TB:CreateMacroButton("CTRL-"..binding, "/cast [@focus, stealth] "..stealthspell.."; [@focus] "..spell)
 	end
 end
 
@@ -253,35 +211,11 @@ function TuckBindings:StanceToIndex(stance_name)
 end
 
 --[[
-    Returns the name of the first known spell or an empty string
-    Input: table of strings or string
-]]
-function TuckBindings:FindKnownSpell(spellname)
-    -- find spell name
-    local spellname_string = ""
-    if type(spellname) == "table" then 
-        -- look for known spell
-        for si, sn in ipairs(spellname) do
-            if TuckBindings:HasSpell(sn) then
-                spellname_string = sn
-                break
-            end
-        end
-    else
-        if TuckBindings:HasSpell(spellname) then
-            spellname_string = spellname
-        end
-    end
-    
-    return spellname_string
-end
-
---[[
     Returs a string of the form "" or ", condition1, condition2, ..."
     Input: string or table of strings
 ]]
 function TuckBindings:ConcatenateConditions(condition)
-    local condition_string = ""
+    local condition_string = ""    
     if type(condition) == "table" then
         for ci, cn in ipairs(condition) do
             condition_string = condition_string..", "..cn
@@ -299,14 +233,7 @@ end
 ]]
 function TuckBindings:ConcatenateTargets(target, condition_string)
     -- adding targets
-    local tbl_targets
-    if type(target) == "table" then 
-        tbl_targets = target
-    elseif target == nil then 
-        tbl_targets = {"target"}
-    else
-        tbl_targets = {target}
-    end
+    local tbl_targets = TB::MakeTable(target, 1, "target")
     
     -- build macro string
     local result_string = ""
@@ -322,33 +249,38 @@ end
     Input: nil or string or table of strings
 ]]
 function TuckBindings:CreateStanceString(stance)
-    -- stance handling stuff
-    if stance == nil then
-        return ""
-    else
-        local stance_list = ""
-        local stance_count = 0
-        if type(stance) == "table" then
-            for i, v in ipairs(stance) do
-                local stance_index = TuckBindings:StanceToIndex(stance[i])
-                if stance_index then
-                    if stance_count > 0 then
-                        stance_list = stance_list.. "/"
-                    end
-                    stance_list = stance_list..stance_index
-                    stance_count = stance_count + 1
-                end
-            end
-        else
-            stance_list = TuckBindings:StanceToIndex(stance)
-        end
-        
-        if stance_list then
-            return "stance:"..stance_list
-        else
-            return ""
-        end
-    end
+	-- stance handling stuff
+	if stance == nil then
+		return "", ""
+	else
+		local stance_list = ""
+		local first_stance = ""
+		local stance_count = 0
+		if type(stance) == "table" then
+			for i, v in ipairs(stance) do
+				local stance_index = TuckBindings:StanceToIndex(v)
+				if stance_index then
+					if stance_count > 0 then
+						stance_list = stance_list.. "/"
+					end
+					stance_list = stance_list..stance_index
+					stance_count = stance_count + 1
+					if first_stance == "" then
+						first_stance = v
+					end
+				end
+			end
+		else
+			stance_list = TuckBindings:StanceToIndex(stance)
+			first_stance = stance
+		end
+
+		if stance_list then
+			return "stance:"..stance_list, first_stance
+		else
+			return "", ""
+		end
+	end
 end
 
 --[[
@@ -357,38 +289,12 @@ end
     Input: nil or string or table of strings.
 ]]
 function TuckBindings:CreateStanceSwitchCastString(stance)
-    -- stance handling stuff
-    if stance == nil then
-        return "/cast "
-    else
-        local stance_list = ""
-        local first_stance = ""
-        local stance_count = 0
-        if type(stance) == "table" then
-            for i, v in ipairs(stance) do
-                local stance_index = TuckBindings:StanceToIndex(stance[i])
-                if stance_index then
-                    if stance_count > 0 then
-                        stance_list = stance_list.. "/"
-                    end
-                    stance_list = stance_list..stance_index
-                    stance_count = stance_count + 1
-                    if first_stance == "" then
-                        first_stance = stance[i]
-                    end
-                end
-            end
-        else
-            stance_list = TuckBindings:StanceToIndex(stance)
-            first_stance = stance
-        end
-        
-        if stance_list then
-            return "/cast [nostance:"..stance_list.."]"..first_stance.."; "
-        else
-            return "/cast "
-        end
-    end
+	local stance_string, first_stance = CreateStanceString(stance)
+	if stance_string ~= "" then
+		return "/cast [no"..stance_string.."]"..first_stance.."; "
+	else
+		return "/cast "
+	end
 end
 
 --[[
