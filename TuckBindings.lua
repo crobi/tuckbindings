@@ -3,6 +3,7 @@
   Writes a message in the default chat frame
 ]]
 local TRACE = function(msg) ChatFrame1:AddMessage(msg) end
+local ERROR = function(msg) ChatFrame1:AddMessage(msg) end
 
 
 --[[
@@ -499,9 +500,7 @@ end
 
 ]]
 function TuckBindings:CreateMacroButton(binding, macrotext, add_to_existing)
-	
     local btn = TuckBindings.buttons[binding]
-    ChatFrame1:AddMessage(binding.."  |  "..macrotext)
     
     if add_to_existing and btn then
         local old_text = btn:GetAttribute("*macrotext*")
@@ -515,6 +514,38 @@ function TuckBindings:CreateMacroButton(binding, macrotext, add_to_existing)
         TuckBindings.btn_count = TuckBindings.btn_count + 1
         TuckBindings.buttons[binding] = btn
     end
+end
+
+--[[
+
+]]
+function TuckBindings:ResetMacroButtons()
+	for i, v in ipairs(TuckBindings.buttons) do
+		local btn = TuckBindings.buttons[v]
+		btn:SetAttribute("*macrotext*", "")
+	end
+end
+
+--[[
+	Returns two boolean values indicating whether a button for the given binding exits and if it has a macro set
+]]
+function TuckBindings:HasMacroButton(binding)
+	local exists = false
+	local empty = nil
+	for i, v in ipairs(TuckBindings.buttons) do
+		if i == binding then
+			exists = true
+			local btn = TuckBindings.buttons[v]
+			local text = btn:GetAttribute("*macrotext*", "")
+			if text == "" or text == nil then
+				empty = true
+			else
+				empty = false
+			end
+		end
+	end
+	
+	return exits, empty
 end
 
 --[[
@@ -536,6 +567,9 @@ function TuckBindings:HasSpell(name)
 	end
 end
 
+--[[
+
+]]
 function TuckBindings:HasPetSpell(name)
 	local i = 1
 	while true do
@@ -559,30 +593,28 @@ end
 local f = CreateFrame("Frame")
 
 f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("PLAYER_TALENT_UPDATE")
 
 f:SetScript("OnEvent", function(self, event, ...)
+
+	-- clear old config
+	TuckBindings::ResetMacroButtons()
 	
-	-- default actions: assist unit
-	TuckBindings:CreateMacroButton("CAPSLOCK", "/assist")
-	TuckBindings:CreateMacroButton("ALT-CAPSLOCK", "/assist focus")
-
-	-- default actions: focus targets, target swapping
-	TuckBindings:CreateTargetSwapButton("§")
-	TuckBindings:CreateMacroButton("SHIFT-§","/focus")
-	TuckBindings:CreateMacroButton("ALT-§","/targetlasttarget")
-
-	-- default actions: bandage self
-	TuckBindings:CreateMacroButton("CTRL-BUTTON3",  "/use [@player] Heavy Netherweave Bandage")
-
-
+	-- load default actions
+	if TuckBindings["common"] then
+		TuckBindings["common"]:Init()
+	else
+		ERROR("TuckBindings: common bindings not found")
+	end
+	
 	-- load profile specific actions
 	local player_class = select(2, UnitClass("player"))
 	if (TuckBindings[player_class]) then
 		TuckBindings[player_class]:Init()
 	else
-		ChatFrame1:AddMessage("unknown class "..player_class)
+		ERROR("TuckBindings: bindings for class "..player_class.." not found")
 	end
 
-	ChatFrame1:AddMessage("Number of bindings: "..TuckBindings.btn_count)
+	TRACE("TuckBindings: "..TuckBindings.btn_count.." key bindings configured")
 	
 end)
