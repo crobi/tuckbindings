@@ -25,7 +25,7 @@ User functions for creating key bindings
 	macro: the macro text
 ]]
 function TuckBindings:Macro(binding, macro)
-	TB:CreateMacroButton(binding, macro)
+	TB:CreateMacroButton(binding, macro,true)
 end
 
 --[[
@@ -41,7 +41,7 @@ function TuckBindings:UseItem(binding, item, targets)
 		local condition_string = TB:ConcatenateConditions(condition)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
-		TB:CreateMacroButton(ibinding, "/use "..option_string..item)
+		TB:CreateMacroButton(ibinding, "/use "..option_string..item,true)
 	end
 end
 
@@ -58,7 +58,7 @@ function TuckBindings:Cast(binding, spell, condition, targets)
 		local condition_string = TB:ConcatenateConditions(condition)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
-		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell)
+		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell,true)
 	end
 end
 
@@ -77,7 +77,7 @@ function TuckBindings:CastNoShapeshift(binding, spell, condition, targets, stanc
 		local condition_string = TB:ConcatenateConditions(condition, stance_string)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
-		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell)
+		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell,true)
 	end
 end
 
@@ -96,7 +96,7 @@ function TuckBindings:CastShapeshift(binding, spell, condition, targets, stances
 		local condition_string = TB:ConcatenateConditions(condition, nil)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
-		TB:CreateMacroButton(ibinding, cast_string..option_string..spell)
+		TB:CreateMacroButton(ibinding, cast_string..option_string..spell,true)
 	end
 end
 
@@ -104,7 +104,7 @@ end
 	Creates a binding that swaps the current target and focus
 ]]
 function TuckBindings:SwapTargetFocus(binding)
-	TuckBindings:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget")
+	TuckBindings:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget",true)
 end
 
 
@@ -133,8 +133,8 @@ end
 	Performs the following conversions:
 		nil -> {binding={"target"}}
 		value -> {binding={value}}
-		{value} -> {binding={value}}
 		{value=value} -> {value={value}}
+		{value={value}} -> {value={value}}
 ]]
 function TuckBindings:MakeTargetConfig(input, binding)	
 	if input == nil then
@@ -143,14 +143,7 @@ function TuckBindings:MakeTargetConfig(input, binding)
 		local result = {}
 		for k, v in pairs(input) do
 			-- fix the key
-			local key = ""
-			if type(k)=="number" then
-				key = binding
-			elseif type(k) == "string" then
-				key = binding.."-"..k
-			else
-				ERROR("unkown key type "..type(k))
-			end
+			local key = k..binding
 			
 			-- fix the value
 			local value = v
@@ -180,7 +173,7 @@ function TuckBindings:ConcatenateConditions(condition, other_condition)
 	if type(condition) == "table" then
 		for ci, cn in ipairs(condition) do
 			if condition_string ~= "" then
-				condition_string = condition_string..", "
+				condition_string = condition_string..","
 			end
 			condition_string = condition_string..cn
 		end
@@ -190,7 +183,7 @@ function TuckBindings:ConcatenateConditions(condition, other_condition)
 	
 	if other_condition and other_condition ~= "" then
 		if condition_string ~= "" then
-			condition_string = condition_string..", "
+			condition_string = condition_string..","
 		end
 		condition_string = condition_string..other_condition
 	end
@@ -208,7 +201,7 @@ function TuckBindings:ConcatenateTargets(target, condition_string)
 	
 	-- build macro string
 	local result_string = ""
-	for ti, target_string in ipairs(tbl_targets) do
+	for ti, target_string in pairs(tbl_targets) do
 		if target_string ~= "target" then
 			result_string = result_string.."[@"..target_string
 		else
