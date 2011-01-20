@@ -22,9 +22,7 @@ User functions for creating key bindings
 --[[
 	Creates a binding for a macro
 	binding: the key binding
-	item: the item name or the number of the item slot
-	condition: the condition that all targets must meet
-	targets: target configuration, see MakeTargetConfig
+	macro: the macro text
 ]]
 function TuckBindings:Macro(binding, macro)
 	TB:CreateMacroButton(binding, macro)
@@ -38,10 +36,10 @@ end
 	targets: target configuration, see MakeTargetConfig
 ]]
 function TuckBindings:UseItem(binding, item, targets)
-	local target_config = TB:MakeTargetConfig(targets)
-	for ibinding, itargets in ipairs(target_config) do
+	local target_config = TB:MakeTargetConfig(targets, binding)
+	for ibinding, itargets in pairs(target_config) do
 		local condition_string = TB:ConcatenateConditions(condition)
-		local option_string = TB:ConcatenateTargets(target, condition_string)
+		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
 		TB:CreateMacroButton(ibinding, "/use "..option_string..item)
 	end
@@ -55,10 +53,10 @@ end
 	targets: target configuration, see MakeTargetConfig
 ]]
 function TuckBindings:Cast(binding, spell, condition, targets)
-	local target_config = TB:MakeTargetConfig(targets)
-	for ibinding, itargets in ipairs(target_config) do
+	local target_config = TB:MakeTargetConfig(targets, binding)
+	for ibinding, itargets in pairs(target_config) do
 		local condition_string = TB:ConcatenateConditions(condition)
-		local option_string = TB:ConcatenateTargets(target, condition_string)
+		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
 		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell)
 	end
@@ -73,11 +71,11 @@ end
 	stances: all stances in which the spell should be cast
 ]]
 function TuckBindings:CastNoShapeshift(binding, spell, condition, targets, stances)
-	local target_config = TB:MakeTargetConfig(targets)
-	for ibinding, itargets in ipairs(target_config) do
-		local stance_string = TuckBindings:CreateStanceString(stance)
+	local target_config = TB:MakeTargetConfig(targets, binding)
+	for ibinding, itargets in pairs(target_config) do
+		local stance_string = TuckBindings:CreateStanceString(stances)
 		local condition_string = TB:ConcatenateConditions(condition, stance_string)
-		local option_string = TB:ConcatenateTargets(target, condition_string)
+		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
 		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell)
 	end
@@ -92,11 +90,11 @@ end
 	stances: all stances in which the spell should be cast. If the caster is not in any of these, he will change to the first in this list
 ]]
 function TuckBindings:CastShapeshift(binding, spell, condition, targets, stances)
-	local target_config = TB:MakeTargetConfig(targets)
-	for ibinding, itargets in ipairs(target_config) do
+	local target_config = TB:MakeTargetConfig(targets, binding)
+	for ibinding, itargets in pairs(target_config) do
 		local cast_string = TB:CreateStanceSwitchCastString(stances)
 		local condition_string = TB:ConcatenateConditions(condition, nil)
-		local option_string = TB:ConcatenateTargets(target, condition_string)
+		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
 		TB:CreateMacroButton(ibinding, cast_string..option_string..spell)
 	end
@@ -138,12 +136,12 @@ end
 		{value} -> {binding={value}}
 		{value=value} -> {value={value}}
 ]]
-function TuckBindings:MakeTargetConfig(input, binding)
+function TuckBindings:MakeTargetConfig(input, binding)	
 	if input == nil then
 		return {binding={"target"}}
 	elseif type(input) == "table" then
 		local result = {}
-		for k, v in ipairs(input) do
+		for k, v in pairs(input) do
 			-- fix the key
 			local key = ""
 			if type(k)=="number" then
@@ -151,7 +149,7 @@ function TuckBindings:MakeTargetConfig(input, binding)
 			elseif type(k) == "string" then
 				key = binding.."-"..k
 			else
-				ERROR("unkown type "..type(k))
+				ERROR("unkown key type "..type(k))
 			end
 			
 			-- fix the value
@@ -191,7 +189,10 @@ function TuckBindings:ConcatenateConditions(condition, other_condition)
 	end
 	
 	if other_condition and other_condition ~= "" then
-		condition_string = condition_string..", "..other_condition
+		if condition_string ~= "" then
+			condition_string = condition_string..", "
+		end
+		condition_string = condition_string..other_condition
 	end
 
 	return condition_string
@@ -202,20 +203,29 @@ end
     Input: nil or string or table of strings
 ]]
 function TuckBindings:ConcatenateTargets(target, condition_string)
-    -- adding targets
-    local tbl_targets = TB:MakeTable(target, 1, "target")
-    
-    -- build macro string
-    local result_string = ""
-    for ti, target_string in ipairs(tbl_targets) do
-        result_string = result_string.."[@"..target_string
-	if condition_string ~= "" then
-		result_string = result_string..","..condition_string
+	-- adding targets
+	local tbl_targets = TB:MakeTable(target, 1, "target")
+	
+	local suffix = condition_string
+	if suffix and suffix ~= "" then
+		suffix = ","..condition_string
+	else
+		suffix = ""
 	end
-	result_string = result_string.."]"
-    end
+    
+	-- build macro string
+	local result_string = ""
+	for ti, target_string in ipairs(tbl_targets) do
+		if target_string ~= "target" then
+			result_string = result_string.."[@"..target_string
+		else
+			result_string = result_string.."["
+		end
+		result_string = result_string..suffix
+		result_string = result_string.."]"
+	end
 
-    return result_string
+	return result_string
 end
 
 --[[
@@ -311,6 +321,7 @@ end
 ]]
 function TuckBindings:CreateMacroButton(binding, macrotext, add_to_existing)
     local btn = TuckBindings.buttons[binding]
+    TRACE(binding..":    "..macrotext)
     
     if add_to_existing and btn then
         local old_text = btn:GetAttribute("*macrotext*")
@@ -402,7 +413,6 @@ end
 ]]
 local f = CreateFrame("Frame")
 
-f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_TALENT_UPDATE")
 
 f:SetScript("OnEvent", function(self, event, ...)
@@ -411,8 +421,8 @@ f:SetScript("OnEvent", function(self, event, ...)
 	TuckBindings:ResetMacroButtons()
 	
 	-- load default actions
-	if TuckBindings["common"] then
-		TuckBindings["common"]:Init()
+	if TuckBindings.common then
+		TuckBindings.common:Init()
 	else
 		ERROR("common bindings not found")
 	end
