@@ -1,15 +1,29 @@
 
 --[[
-
+  Writes a message in the default chat frame
 ]]
 local TRACE = function(msg) ChatFrame1:AddMessage(msg) end
 
 
 --[[
-
+  Global variables
 ]]
 TuckBindings = {btn_count = 0, buttons = {} }
 
+--[[
+  Converts the input into a table
+    nil -> {default_key->default_value}
+    value -> {default_key->value}
+]]
+function TuckBindings::MakeTable(input, default_value, default_key)
+	if input == nil then
+		return {default_key=default_value}
+	elseif type(input) == "table" then
+		return input
+	elseif
+		return {default_key=input}
+	end
+end
 
 --[[
 
@@ -216,47 +230,12 @@ function TuckBindings:CreateStanceButton(binding, mod,
 
 end
 
-
-local stance_indices = {}
--- all
-stance_indices["None"] = 0
-stance_indices["No Stance"] = 0
-stance_indices["Human Form"] = 0
-stance_indices["Human"] = 0
--- warrior
-stance_indices["Battle Stance"] = 1
-stance_indices["Defensive Stance"] = 2
-stance_indices["Berserker Stance"] = 3
--- druid
-stance_indices["Bear Form"] = 1
-stance_indices["Dire Bear Form"] = 1
-stance_indices["Aquatic Form"] = 2
-stance_indices["Cat Form"] = 3
-stance_indices["Travel Form"] = 4
-stance_indices["Moonkin Form"] = 5
-stance_indices["Tree of Life"] = 5
-stance_indices["Flight Form"] = 6 -- or 5, if no moonkin/tree of life present. will not work correctly
--- priest
-stance_indices["Shadowform"] = 1
--- rogue
-stance_indices["Stealth"] = 1
--- shaman
-stance_indices["Ghost Wolf"] = 1
--- paladin
-stance_indices["Devotion Aura"] = 1
-stance_indices["Retribution Aura"] = 2
-stance_indices["Concentration Aura"] = 3
-stance_indices["Shadow Resistance Aura"] = 4
-stance_indices["Frost Resistance Aura"] = 5
-stance_indices["Fire Resistance Aura"] = 6
-stance_indices["Crusader Aura"] = 7
-
 --[[
     Returns the index of the given stance
 ]]
 function TuckBindings:StanceToIndex(stance_name)
     --ChatFrame1:AddMessage("Getting stance index of: "..stance_name)
-    if stance_name == nil or stance_name == "Human" or stance_name == "Human Form" or stance_name == "No Stance" then
+    if stance_name == nil then
         return 0
     end
     
