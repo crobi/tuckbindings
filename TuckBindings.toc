@@ -1,7 +1,22 @@
 ## Interface: 40000
 ## Title: TuckBindings
 ## Notes: Key bindings
-## Version: 0 
+## Version: 1
 ## Author: Tuck
 
 TuckBindings.lua
+TuckBindingsCommon.lua
+TuckBindingsDeathKnight.lua
+TuckBindingsDruid.lua
+TuckBindingsHunter.lua
+TuckBindingsMage.lua
+TuckBindingsPaladin.lua
+TuckBindingsPriest.lua
+TuckBindingsRogue.lua
+TuckBindingsShaman.lua
+TuckBindingsWarlock.lua
+TuckBindingsWarrior.lua
+
+
+
+
