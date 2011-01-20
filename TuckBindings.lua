@@ -15,6 +15,109 @@ local TB = TuckBindings
 local human_form = ""
 
 --[[
+====================================================================================================================================================================================================
+User functions for creating key bindings
+====================================================================================================================================================================================================
+]]
+
+--[[
+	Creates a binding for a macro
+	binding: the key binding
+	item: the item name or the number of the item slot
+	condition: the condition that all targets must meet
+	targets: target configuration, see MakeTargetConfig
+]]
+function TuckBindings:Macro(binding, macro)
+	TB:CreateMacroButton(binding, macro)
+end
+
+--[[
+	Creates  a binding for using an item
+	binding: the key binding
+	item: the item name or the number of the item slot
+	condition: the condition that all targets must meet
+	targets: target configuration, see MakeTargetConfig
+]]
+function TuckBindings:UseItem(binding, item, targets)
+	local target_config = TB:MakeTargetConfig(targets)
+	for ibinding, itargets in ipairs(target_config) do
+		local condition_string = TB:ConcatenateConditions(condition)
+		local option_string = TB:ConcatenateTargets(target, condition_string)
+		
+		TB:CreateMacroButton(ibinding, "/use "..option_string..item)
+	end
+end
+
+--[[
+	Creates a binding for casting a spell
+	binding: the key binding
+	spell: the item name or the number of the item slot
+	condition: the condition that all targets must meet
+	targets: target configuration, see MakeTargetConfig
+]]
+function TuckBindings:Cast(binding, spell, condition, targets)
+	local target_config = TB:MakeTargetConfig(targets)
+	for ibinding, itargets in ipairs(target_config) do
+		local condition_string = TB:ConcatenateConditions(condition)
+		local option_string = TB:ConcatenateTargets(target, condition_string)
+		
+		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell)
+	end
+end
+
+--[[
+	Creates a binding for casting a spell, if the caster is in the given stance. Otherwise, nothing will happen
+	binding: the key binding
+	spell: the item name or the number of the item slot
+	condition: the condition that all targets must meet
+	targets: target configuration, see MakeTargetConfig
+	stances: all stances in which the spell should be cast
+]]
+function TuckBindings:CastNoShapeshift(binding, spell, condition, targets, stances)
+	local target_config = TB:MakeTargetConfig(targets)
+	for ibinding, itargets in ipairs(target_config) do
+		local stance_string = TuckBindings:CreateStanceString(stance)
+		local condition_string = TB:ConcatenateConditions(condition, stance_string)
+		local option_string = TB:ConcatenateTargets(target, condition_string)
+		
+		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell)
+	end
+end
+
+--[[
+	Creates a binding for casting a spell. If the caster is not in the given stance yet, he will change stances first
+	binding: the key binding
+	spell: the item name or the number of the item slot
+	condition: the condition that all targets must meet
+	targets: target configuration, see MakeTargetConfig
+	stances: all stances in which the spell should be cast. If the caster is not in any of these, he will change to the first in this list
+]]
+function TuckBindings:CastShapeshift(binding, spell, condition, targets, stances)
+	local target_config = TB:MakeTargetConfig(targets)
+	for ibinding, itargets in ipairs(target_config) do
+		local cast_string = TB:CreateStanceSwitchCastString(stances)
+		local condition_string = TB:ConcatenateConditions(condition, nil)
+		local option_string = TB:ConcatenateTargets(target, condition_string)
+		
+		TB:CreateMacroButton(ibinding, cast_string..option_string..spell)
+	end
+end
+
+--[[
+	Creates a binding that swaps the current target and focus
+]]
+function TuckBindings:SwapTargetFocus(binding)
+	TuckBindings:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget")
+end
+
+
+--[[
+====================================================================================================================================================================================================
+Internal functions
+====================================================================================================================================================================================================
+]]
+
+--[[
 	Converts the input into a table
 		nil -> {default_key=default_value}
 		value -> {default_key=value}
@@ -43,9 +146,11 @@ function TuckBindings::MakeTargetConfig(input, binding)
 		local result = {}
 		for k, v in ipairs(input) do
 			-- fix the key
-			local key = k
+			local key
 			if type(k)=="number" then
 				key = binding
+			else
+				key = binding.."-"..k
 			end
 			
 			-- fix the value
@@ -67,45 +172,28 @@ function TuckBindings::MakeTargetConfig(input, binding)
 	end
 end
 
-Macro(binding)
-UseItem(binding, item, targets)
-Cast(binding, condition, targets, altcast)
-CastNoShapeshift(binding, condition, targets, altcast, stances)
-CastShapeshift(binding, condition, targets, altcast, stances)
-TargetFocusSwap(binding)
-
-
-
 --[[
-
-]]
-function TuckBindings:UseItem(binding, item, targets)
-	TB:CreateMacroButton(binding, "/use "..item)
-	
-	if (selfcast) then
-		TB:CreateMacroButton("SHIFT-"..binding, "/use [@player] "..item)
-	end
-	
-	if (focuscast) then
-		TB:CreateMacroButton("CTRL-"..binding, "/use [@focus] "..item)
-	end
-end
-
---[[
-    Returs a string of the form "" or ", condition1, condition2, ..."
+    Returs a string of the form "" or "condition1, condition2, ..."
     Input: string or table of strings
 ]]
-function TuckBindings:ConcatenateConditions(condition)
-    local condition_string = ""    
-    if type(condition) == "table" then
-        for ci, cn in ipairs(condition) do
-            condition_string = condition_string..", "..cn
-        end
-    elseif condition ~= nil then
-        condition_string = ", "..condition
-    end
-    
-    return condition_string
+function TuckBindings:ConcatenateConditions(condition, other_condition)
+	local condition_string = ""    
+	if type(condition) == "table" then
+		for ci, cn in ipairs(condition) do
+			if condition_string ~= "" then
+				condition_string = condition_string..", "
+			end
+			condition_string = condition_string..cn
+		end
+	elseif condition then
+		condition_string = condition
+	end
+	
+	if other_condition and other_condition ~= "" then
+		condition_string = condition_string..", "..other_condition
+	end
+
+	return condition_string
 end
 
 --[[
@@ -119,7 +207,11 @@ function TuckBindings:ConcatenateTargets(target, condition_string)
     -- build macro string
     local result_string = ""
     for ti, target_string in ipairs(tbl_targets) do
-        result_string = result_string.."[@"..target_string..condition_string.."]"
+        result_string = result_string.."[@"..target_string
+	if condition_string ~= "" then
+		result_string = result_string..","..condition_string
+	end
+	result_string = result_string.."]"
     end
 
     return result_string
@@ -211,103 +303,6 @@ function TuckBindings:CreateStanceSwitchCastString(stance)
 	else
 		return "/cast "
 	end
-end
-
---[[
-    Use if you want a key to do different things in different stances. The action is only
-    executed if you are in any of the given stances. Does not switch stances.
-    See TuckBindings:CreateSpellBinding for options.
-
-]]
-function TuckBindings:CreateStanceBinding(binding, spellname, condition, target, altcast_mod, altcast_target, stance, add_to_existing)
-   
-    -- find spell name
-    local spellname_string = TuckBindings:FindKnownSpell(spellname)
-
-    -- abort if no spell found
-    if spellname_string == "" then
-        TRACE("No spell in the spell list known by player, binding skipped")
-        return
-    end
-    
-    -- concatenate conditions
-    local condition_string = TuckBindings:ConcatenateConditions(condition)
-    
-    -- add correct stance
-    local stance_string = TuckBindings:CreateStanceString(stance)
-    if (stance_string ~= "") then
-        condition_string = condition_string..", "..stance_string
-    end
-    
-    -- cast string
-    local macro_string = "/cast "
-      
-    -- build macro string
-    local option_string = TuckBindings:ConcatenateTargets(target, condition_string)
-
-    -- create macro
-   TuckBindings:CreateMacroButton(binding, macro_string.." "..option_string.." "..spellname_string, true)
-    
-    -- alternate cast
-    
-    if (altcast_mod) then
-        local altcast_option_string = TuckBindings:ConcatenateTargets(altcast_target, condition_string)
-	local altcast_binding = altcast_mod.."-"..binding
-        TuckBindings:CreateMacroButton(altcast_binding, macro_string.." "..altcast_option_string.." "..spellname_string, true)
-    end
-end
-
---[[
-    Creates a Spell Binding.
-    For classes with stances, use this if you want to have for each ability its own key. The player will shift to the desired stance if the spell
-        is not available in the current stance.
-    
-    binding:            [NOT NIL] Name of the bound key, e.g. "Q". 
-    spellname:          [NOT NIL] Name of the spell, e.g. "Cyclone". If this argument is a table, the first known spell in the list will be used.
-    condition:          [NIL] Conditions that the target must meet, e.g. "harm". If this argument is a table, all of the conditions must be met.
-    target:             [NIL] Target of the spell, e.g. "party1". If this argument is a table, 
-                        the targets are tried in order until one meets the condition. Default: "target"
-                        
-    altcast_modifier:   [NIL] Modifier key for casting the spell on an alternate target.
-    altcast_target:     [NIL] Alternate target for the spell. Can be a table. Use for self-casting.
-    
-    stance:             [NIL] Stance that you must be in to be able to use the ability. If you are not in that stances, you will change stances first.
-                        If this argument is a table, you must be in any of these stances and will shift to the first one if not.
-]]
-function TuckBindings:CreateSpellBinding(binding, spellname, condition, target, altcast_modifier, altcast_target, stance)
-    -- find spell name
-    local spellname_string = TuckBindings:FindKnownSpell(spellname)
-
-    -- abort if no spell found
-    if spellname_string == "" then
-        TRACE("No spell in the spell list known by player, binding skipped")
-        return
-    end
-    
-    -- concatenate conditions
-    local condition_string = TuckBindings:ConcatenateConditions(condition)
-    
-    -- stance handling stuff
-    local macro_string = TuckBindings:CreateStanceSwitchCastString(stance)
-      
-    -- build macro string
-    local option_string = TuckBindings:ConcatenateTargets(target, condition_string)
-
-    -- create macro
-   TuckBindings:CreateMacroButton(binding, macro_string.." "..option_string.." "..spellname_string)
-    
-    -- alternate cast
-    if altcast_modifer then
-        local option_string = TuckBindings:ConcatenateTargets(altcast_target, condition_string)
-        TuckBindings:CreateMacroButton(altcast_modifer.."-"..binding, macro_string.." "..option_string.." "..spellname_string)
-    end
-end
-
---[[
-
-]]
-function TuckBindings:CreateTargetSwapButton(binding)
-    TuckBindings:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget")
 end
 
 --[[
