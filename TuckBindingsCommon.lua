@@ -3,6 +3,13 @@ local TB = TuckBindings
 
 function TuckBindings.common:Init()
 
---TODO: Add all class-independent key bindings here
+-- default actions: assist unit
+TB:Macro("CAPSLOCK", "/assist")
+TB:Macro("ALT-CAPSLOCK", "/assist focus")
+
+-- default actions: focus targets, target swapping
+TB:SwapTargetFocus("§")
+TB:Macro("SHIFT-§","/focus")
+TB:Macro("ALT-§","/targetlasttarget")
 
 end
