@@ -2,8 +2,8 @@
 --[[
   Writes a message in the default chat frame
 ]]
-local TRACE = function(msg) ChatFrame1:AddMessage(msg) end
-local ERROR = function(msg) ChatFrame1:AddMessage(msg) end
+local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
+local ERROR = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
 
 
 --[[
@@ -15,9 +15,9 @@ local TB = TuckBindings
 local human_form = ""
 
 --[[
-  Converts the input into a table
-    nil -> {default_key->default_value}
-    value -> {default_key->value}
+	Converts the input into a table
+		nil -> {default_key=default_value}
+		value -> {default_key=value}
 ]]
 function TuckBindings::MakeTable(input, default_value, default_key)
 	if input == nil then
@@ -29,24 +29,65 @@ function TuckBindings::MakeTable(input, default_value, default_key)
 	end
 end
 
+--[[
+	Performs the following conversions:
+		nil -> {binding={"target"}}
+		value -> {binding={value}}
+		{value} -> {binding={value}}
+		{value=value} -> {value={value}}
+]]
+function TuckBindings::MakeTargetConfig(input, binding)
+	if input == nil then
+		return {binding={"target"}}
+	elseif type(input) == "table"
+		local result = {}
+		for k, v in ipairs(input) do
+			-- fix the key
+			local key = k
+			if type(k)=="number" then
+				key = binding
+			end
+			
+			-- fix the value
+			local value = v
+			if v == nil then
+				value = "target"
+			elseif type(v) == "table"
+				value = v
+			else
+				value = {v}
+			end
+			
+			-- add to result
+			result[key] = value
+		end
+		return result
+	else
+		return {binding={input}}
+	end
+end
+
 Macro(binding)
+UseItem(binding, item, targets)
 Cast(binding, condition, targets, altcast)
 CastNoShapeshift(binding, condition, targets, altcast, stances)
 CastShapeshift(binding, condition, targets, altcast, stances)
+TargetFocusSwap(binding)
+
 
 
 --[[
 
 ]]
-function TuckBindings:CreateItemButton(binding, item, selfcast, focuscast)
-	TuckBindings:CreateMacroButton(binding, "/use "..item)
+function TuckBindings:UseItem(binding, item, targets)
+	TB:CreateMacroButton(binding, "/use "..item)
 	
 	if (selfcast) then
-		TuckBindings:CreateMacroButton("SHIFT-"..binding, "/use [@player] "..item)
+		TB:CreateMacroButton("SHIFT-"..binding, "/use [@player] "..item)
 	end
 	
 	if (focuscast) then
-		TuckBindings:CreateMacroButton("CTRL-"..binding, "/use [@focus] "..item)
+		TB:CreateMacroButton("CTRL-"..binding, "/use [@focus] "..item)
 	end
 end
 
@@ -150,6 +191,7 @@ function TuckBindings:CreateStanceString(stance)
 		if stance_count > 0 then
 			return "stance:"..stance_list, first_stance
 		else
+			ERROR("requested stance not found, stance switching ignored for the current binding")
 			return nil, nil
 		end
 	end
@@ -265,15 +307,7 @@ end
 
 ]]
 function TuckBindings:CreateTargetSwapButton(binding)
-	--TuckBindings:CreateMacroButton(binding, "/target focus\n/targetlasttarget\n/focus\n/targetlasttarget")
     TuckBindings:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget")
-end
-
---[[
-
-]]
-function TuckBindings:CreateTotemStompButton(binding)
-    TuckBindings:CreateMacroButton(binding, "/petattack [@Healing Stream Totem]\n/petattack [@Mana Spring Totem]\n/petattack [@Windfury Totem]\n/petattack [@Tremor Totem]\n/petattack [@Grounding Totem]\n/petattack [@Mana Tide Totem]")
 end
 
 --[[
@@ -384,7 +418,7 @@ f:SetScript("OnEvent", function(self, event, ...)
 	if TuckBindings["common"] then
 		TuckBindings["common"]:Init()
 	else
-		ERROR("TuckBindings: common bindings not found")
+		ERROR("common bindings not found")
 	end
 	
 	-- load profile specific actions
@@ -392,9 +426,9 @@ f:SetScript("OnEvent", function(self, event, ...)
 	if (TuckBindings[player_class]) then
 		TuckBindings[player_class]:Init()
 	else
-		ERROR("TuckBindings: bindings for class "..player_class.." not found")
+		ERROR("bindings for class "..player_class.." not found")
 	end
 
-	TRACE("TuckBindings: "..TuckBindings.btn_count.." key bindings configured")
+	TRACE(""..TuckBindings.btn_count.." key bindings configured")
 	
 end)
