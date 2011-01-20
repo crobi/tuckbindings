@@ -138,7 +138,7 @@ end
 ]]
 function TuckBindings:MakeTargetConfig(input, binding)	
 	if input == nil then
-		return {binding={"target"}}
+		return {[binding]={"target"}}
 	elseif type(input) == "table" then
 		local result = {}
 		for k, v in pairs(input) do
@@ -167,7 +167,7 @@ function TuckBindings:MakeTargetConfig(input, binding)
 		end
 		return result
 	else
-		return {binding={input}}
+		return {[binding]={input}}
 	end
 end
 
@@ -206,13 +206,6 @@ function TuckBindings:ConcatenateTargets(target, condition_string)
 	-- adding targets
 	local tbl_targets = TB:MakeTable(target, 1, "target")
 	
-	local suffix = condition_string
-	if suffix and suffix ~= "" then
-		suffix = ","..condition_string
-	else
-		suffix = ""
-	end
-    
 	-- build macro string
 	local result_string = ""
 	for ti, target_string in ipairs(tbl_targets) do
@@ -221,7 +214,12 @@ function TuckBindings:ConcatenateTargets(target, condition_string)
 		else
 			result_string = result_string.."["
 		end
-		result_string = result_string..suffix
+		if condition_string and condition_string ~= "" then
+			if target_string ~= "target" then
+				result_string = result_string..","
+			end
+			result_string = result_string..condition_string
+		end
 		result_string = result_string.."]"
 	end
 
