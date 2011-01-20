@@ -133,6 +133,7 @@ end
 	Performs the following conversions:
 		nil -> {binding={"target"}}
 		value -> {binding={value}}
+		{value} -> {binding={value}}
 		{value=value} -> {value={value}}
 		{value={value}} -> {value={value}}
 ]]
@@ -142,8 +143,15 @@ function TuckBindings:MakeTargetConfig(input, binding)
 	elseif type(input) == "table" then
 		local result = {}
 		for k, v in pairs(input) do
+
 			-- fix the key
-			local key = k..binding
+			local key
+			if type(k) == "string" then
+				key = k..binding
+			else
+				key = binding
+			end
+			
 			
 			-- fix the value
 			local value = v
@@ -156,7 +164,13 @@ function TuckBindings:MakeTargetConfig(input, binding)
 			end
 			
 			-- add to result
-			result[key] = value
+			if result[key] then
+				for ri, rv in pairs(value) do
+					tinsert(result[key], rv)
+				end
+			else
+				result[key] = value
+			end
 		end
 		return result
 	else
@@ -202,15 +216,15 @@ function TuckBindings:ConcatenateTargets(target, condition_string)
 	-- build macro string
 	local result_string = ""
 	for ti, target_string in pairs(tbl_targets) do
-		if target_string ~= "target" then
+		--if target_string ~= "target" then
 			result_string = result_string.."[@"..target_string
-		else
-			result_string = result_string.."["
-		end
+		--else
+		--	result_string = result_string.."["
+		--end
 		if condition_string and condition_string ~= "" then
-			if target_string ~= "target" then
+			--if target_string ~= "target" then
 				result_string = result_string..","
-			end
+			--end
 			result_string = result_string..condition_string
 		end
 		result_string = result_string.."]"
