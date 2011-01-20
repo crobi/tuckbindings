@@ -9,10 +9,9 @@ local ERROR = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
 --[[
   Global variables
 ]]
-TuckBindings = {btn_count = 0, buttons = {} }
+TuckBindings = {btn_count = 0, buttons = {}, human_form = "" }
 
 local TB = TuckBindings
-local human_form = ""
 
 --[[
 ====================================================================================================================================================================================================
@@ -122,12 +121,12 @@ Internal functions
 		nil -> {default_key=default_value}
 		value -> {default_key=value}
 ]]
-function TuckBindings::MakeTable(input, default_value, default_key)
+function TuckBindings:MakeTable(input, default_value, default_key)
 	if input == nil then
 		return {default_key=default_value}
 	elseif type(input) == "table" then
 		return input
-	elseif
+	else
 		return {default_key=input}
 	end
 end
@@ -139,25 +138,27 @@ end
 		{value} -> {binding={value}}
 		{value=value} -> {value={value}}
 ]]
-function TuckBindings::MakeTargetConfig(input, binding)
+function TuckBindings:MakeTargetConfig(input, binding)
 	if input == nil then
 		return {binding={"target"}}
-	elseif type(input) == "table"
+	elseif type(input) == "table" then
 		local result = {}
 		for k, v in ipairs(input) do
 			-- fix the key
-			local key
+			local key = ""
 			if type(k)=="number" then
 				key = binding
-			else
+			elseif type(k) == "string" then
 				key = binding.."-"..k
+			else
+				ERROR("unkown type "..type(k))
 			end
 			
 			-- fix the value
 			local value = v
 			if v == nil then
 				value = "target"
-			elseif type(v) == "table"
+			elseif type(v) == "table" then
 				value = v
 			else
 				value = {v}
@@ -202,7 +203,7 @@ end
 ]]
 function TuckBindings:ConcatenateTargets(target, condition_string)
     -- adding targets
-    local tbl_targets = TB::MakeTable(target, 1, "target")
+    local tbl_targets = TB:MakeTable(target, 1, "target")
     
     -- build macro string
     local result_string = ""
@@ -220,8 +221,8 @@ end
 --[[
     Returns true if the given stance name corresponds to the human form/no stance
 ]]
-function TuckBindings::IsHumanForm(stance_name)
-	return stance_name == human_form or stance_name == "Human"
+function TuckBindings:IsHumanForm(stance_name)
+	return stance_name == TB.human_form or stance_name == "Human"
 end
 
 --[[
@@ -407,7 +408,7 @@ f:RegisterEvent("PLAYER_TALENT_UPDATE")
 f:SetScript("OnEvent", function(self, event, ...)
 
 	-- clear old config
-	TuckBindings::ResetMacroButtons()
+	TuckBindings:ResetMacroButtons()
 	
 	-- load default actions
 	if TuckBindings["common"] then
