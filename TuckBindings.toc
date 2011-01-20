@@ -1,0 +1,7 @@
+## Interface: 40000
+## Title: TuckBindings
+## Notes: Key bindings
+## Version: 0 
+## Author: Tuck
+
+TuckBindings.lua
