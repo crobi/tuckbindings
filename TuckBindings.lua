@@ -418,7 +418,8 @@ end
 ]]
 local f = CreateFrame("Frame")
 
-f:RegisterEvent("PLAYER_TALENT_UPDATE")
+f:RegisterEvent("PLAYER_ENTERING_WORLD")
+f:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
 f:SetScript("OnEvent", function(self, event, ...)
 
