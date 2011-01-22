@@ -311,7 +311,7 @@ end
     Input: nil or string or table of strings.
 ]]
 function TuckBindings:CreateStanceSwitchCastString(stance)
-	local stance_string, first_stance = CreateStanceString(stance)
+	local stance_string, first_stance = TB:CreateStanceString(stance)
 	if stance_string and TB:IsHumanForm(first_stance) then
 		return "/cancelform [no"..stance_string.."]\n/cast "
 	elseif stance_string then
