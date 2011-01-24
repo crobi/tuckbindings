@@ -1,34 +1,38 @@
 TuckBindings.MAGE = {}
+local TB = TuckBindings
 
 function TuckBindings.MAGE:Init()
 
+-- Shortcuts for target configurations
+local targets_selfcast = {[""] = "target", ["SHIFT-"]="player"}
+local targets_focus =    {[""] = "target", ["SHIFT-"]="focus"}
+
 -- attack
-TuckBindings:CreateMacroButton("T",		   "/startattack")
-TuckBindings:CreateMacroButton("SHIFT-T",  "/startattack focus")
-TuckBindings:CreateMacroButton("1",		   "/cast Shoot")
-TuckBindings:CreateMacroButton("CAPSLOCK", "/assist")
-TuckBindings:CreateMacroButton("SHIFT-CAPSLOCK", "/assist focus")
+TB:Macro("T",		    "/startattack")
+TB:Macro("SHIFT-T",         "/startattack focus")
+TB:Macro("1",		    "/cast Shoot")
+TB:Macro("CAPSLOCK",        "/assist")
+TB:Macro("SHIFT-CAPSLOCK",  "/assist focus")
 
 -- damage
-TuckBindings:CreateSpellButton("2",        "Frostbolt")
-TuckBindings:CreateSpellButton("E",        "Fireball")
-TuckBindings:CreateSpellButton("SHIFT-E",  "Pyroblast")
-TuckBindings:CreateSpellButton("4",		   "Scorch")
-TuckBindings:CreateSpellButton("R",        "Fire Blast")
-TuckBindings:CreateSpellButton("SHIFT-R",  "Cone of Cold")
-TuckBindings:CreateSpellButton("SHIFT-C",  "Frost Nova")
-TuckBindings:CreateSpellButton("F",        "Arcane Explosion")
-TuckBindings:CreateSpellButton("7",        "Rain of Fire")
+TB:Cast("2",        "Frostbolt")
+TB:Cast("E",        "Fireball")
+TB:Cast("SHIFT-E",  "Pyroblast")
+TB:Cast("4",        "Scorch")
+TB:Cast("R",        "Fire Blast")
+TB:Cast("SHIFT-R",  "Cone of Cold")
+TB:Cast("SHIFT-C",  "Frost Nova")
+TB:Cast("F",        "Arcane Explosion")
 
 -- misc
-TuckBindings:CreateSpellButton("C",        "Blink")
-TuckBindings:CreateMacroButton("Q",        "/cast [nodead, harm, target=focus] Polymorph; Polymorph")
+TB:Cast("C",        "Blink")
+TB:Cast("Q",        "Polymorph", "harm")
 
 
 -- buffs
-TuckBindings:CreateSpellButton("0",		   "Mana Shield")
-TuckBindings:CreateSpellButton("-",		   "Dampen Magic", true, true)
-TuckBindings:CreateSpellButton("SHIFT--",  "Amplify Magic", true, true)
-TuckBindings:CreateSpellButton("=",		   "Arcane Intellect", true, true)
-TuckBindings:CreateSpellButton("SHIFT-=",  "Arcane Brilliance", true, true)
+TB:Cast("0",		   "Mana Shield")
+TB:Cast("-",		   "Dampen Magic")
+TB:Cast("SHIFT--",         "Amplify Magic")
+TB:Cast("=",		   "Arcane Intellect")
+
 end
