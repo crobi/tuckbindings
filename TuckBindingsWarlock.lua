@@ -28,7 +28,7 @@ TB:Cast("ALT-V",			"Curse of Tonges",	"harm", targets_focus)
 TB:Cast("R",			"Fear",			"harm", targets_focus)
 TB:Cast("ALT-R",			"Death Coil",		"harm", targets_focus)
 TB:Cast("Q",			"Banish",			"harm", targets_focus)
-TB:Cast("X",			"Life Tap",			"harm", targets_focus)
+TB:Cast("X",			"Life Tap")
 
 TB:Macro("T", 			"/petattack")
 TB:Macro("SHIFT-T", 		"/petattack [@focus]")
