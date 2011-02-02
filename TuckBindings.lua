@@ -331,6 +331,9 @@ function TuckBindings:CreateMacroButton(binding, macrotext, add_to_existing)
     if add_to_existing and btn then
         local old_text = btn:GetAttribute("*macrotext*")
         local new_text = old_text.."\n"..macrotext
+	if (string.len(new_text)>255) then
+		ERROR("Macro for binding"..binding.."too long")
+	end
         btn:SetAttribute("*macrotext*", new_text)
     else
         btn = CreateFrame("Button", "TuckBindingsButton"..TuckBindings.btn_count, nil, "SecureActionButtonTemplate")
