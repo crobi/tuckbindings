@@ -42,21 +42,31 @@ TB:CastNoShapeshift("G", "Bash",				"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("Q", "Faerie Fire (Feral)",		"harm", targets_focus, {"Cat Form", "Bear Form"})
 
 TB:Macro("E", "/startattack", true)
+
+TB:CastNoShapeshift("E", "Pounce", 			"stealth", targets_focus, "Cat Form")
+
 TB:CastNoShapeshift("E", "Mangle", 			"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("E", "Mangle(Cat Form)", 		"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("E", "Wrath", 				"harm", targets_focus, TB.human_form)
 
+TB:CastNoShapeshift("R", "Ravage", 			"stealth", targets_focus, "Cat Form")
+
 TB:CastNoShapeshift("R", "Maul", 				"harm", targets_focus, "Bear Form")
-TB:CastNoShapeshift("R", "Claw", 				"harm", targets_focus, "Cat Form")
+TB:CastNoShapeshift("R", "Shred", 				"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("R", "Moonfire", 			"harm", targets_focus, TB.human_form)
 
+TB:CastNoShapeshift("ALT-R", "Swipe", 			"harm", targets_focus, "Bear Form")
+TB:CastNoShapeshift("ALT-R", "Swipe(Cat Form)", 	"harm", targets_focus, "Cat Form")
+
 TB:CastNoShapeshift("F", "Growl", 				"harm", targets_focus, "Bear Form")
-TB:CastNoShapeshift("F", "Cover", 				"harm", targets_focus, "Cat Form")
+TB:CastNoShapeshift("F", "Cower", 				"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("F", "Remove Corruption",		"help",  targets_selfcast, TB.human_form)
 
 TB:CastNoShapeshift("C", "Demoralizing Roar", 		nil, nil, "Bear Form")
 TB:CastNoShapeshift("C", "Ferocious Bite", 		"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("C", "Rejuvenation", 		"help",  targets_selfcast, TB.human_form)
+
+TB:CastNoShapeshift("ALT-C", "Rip", 			"harm", targets_focus, "Cat Form")
 
 TB:CastNoShapeshift("X", "Feral Charge", 		"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("X", "Feral Charge(Cat Form)",	"harm", targets_focus, "Cat Form")
