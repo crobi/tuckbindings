@@ -76,7 +76,7 @@ TB:Cast("7",       			"Mana Burn",		"harm", targets_focus)
 TB:Cast("8",			"Fear Ward", 		"help", targets_selfcast)
 TB:Cast("ALT-8",			"Inner Fire")
 TB:Cast("9",        		"Resurrection")
-TB:Cast("^",		   	"Shadow Protection", 	"help", targets_selfcast)
-TB:Cast("'",		   		"Power Word: Fortitude", "help", targets_selfcast)
+TB:Cast("^",		   	"Shadow Protection")
+TB:Cast("'",		   		"Power Word: Fortitude")
 
 end
