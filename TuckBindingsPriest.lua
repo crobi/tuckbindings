@@ -48,6 +48,7 @@ TB:Cast("ALT-SHIFT-E",  	"Holy Nova")
 TB:Cast("ALT-E",    		"Stoneform")
 TB:Cast("SHIFT-E",    		"Fade")
 
+TB:Cast("BUTTON3",   		"Desperate Prayer")
 TB:Macro("ALT-BUTTON3",   	"/use 13")
 TB:Macro("SHIFT-BUTTON3", "/use 14")
 

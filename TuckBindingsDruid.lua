@@ -9,9 +9,9 @@ local targets_selfcast = {[""] = "target", ["SHIFT-"]="player"}
 local targets_focus =    {[""] = "target", ["SHIFT-"]="focus"}
 
 -- Forms
-TB:Cast("CTRL-1", "Bear Form")
-TB:Cast("CTRL-2", "Cat Form")
-TB:Cast("CTRL-3", "Travel Form")
+--TB:Cast("CTRL-1", "Bear Form")
+--TB:Cast("CTRL-2", "Cat Form")
+--TB:Cast("CTRL-3", "Travel Form")
 
 -- Buffs
 TB:Cast("0", "Mark of the Wild",	nil, targets_selfcast)
