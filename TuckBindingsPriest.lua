@@ -29,19 +29,21 @@ if TB:HasSpell("Desperate Prayer") then
 end
 
 -- crowd controlS
-TB:Cast("B",   			"Mind Control", 		"harm", targets_focus)
-TB:Cast("Q",   			"Shackle Undead",	"harm", targets_focus)
+TB:Cast("Q",   			"Mind Control", 		"harm", targets_focus)
+TB:Cast("ALT-Q",   		"Shackle Undead",	"harm", targets_focus)
 TB:Cast("E",    			"Psychic Scream")
 
 -- mana efficiency
 TB:Cast("X",			"Inner Focus")
 TB:Macro("ALT-X",		"/cast Shadowfiend\n/petaggressive")
+TB:Cast("CTRL-X",		"Mana Burn",		"harm", targets_focus)
 
 -- dispel
 TB:Cast("R", 			"Power Word: Shield", 	"help", targets_selfcast)
 TB:Cast("ALT-R", 		"!Power Word: Barrier")
 TB:Cast("F", 			"Dispel Magic", 		nil, targets_selfcast)
 TB:Cast("ALT-F", 		"!Mass Dispel")
+TB:Cast("CTRL-F", 		"Cure Disease", 		"help", targets_selfcast)
 
 -- defense stuff
 TB:Cast("ALT-SHIFT-E",  	"Holy Nova")
@@ -65,13 +67,15 @@ TB:Cast("ALT-4",			"Heal", 			"help", targets_selfcast)
 
 -- damage
 TB:Cast("ALT-C",			"Shadow Word: Pain",	"harm", targets_tank)
-TB:Cast("8",       			"Mana Burn", 		"harm", targets_focus)
+TB:Cast("ALT-V",			"Devouring Plague",	"harm", targets_tank)
 TB:Cast("5",       			"Mind Blast",		"harm", targets_focus)
 TB:Cast("ALT-5", 		"Shadow Word: Death",	"harm", targets_focus)
 TB:Cast("Y",       		"Mind Spike", 		"harm", targets_focus)
 TB:Cast("6",       			"Smite",			"harm", targets_tank)
 TB:Cast("ALT-6",  		"Holy Fire",			"harm", targets_tank)
 TB:Cast("7",       			"Mana Burn",		"harm", targets_focus)
+
+TB:Cast("0",        		"Cure Disease")
 
 -- buffs
 TB:Cast("8",			"Fear Ward", 		"help", targets_selfcast)

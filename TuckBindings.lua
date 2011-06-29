@@ -2,8 +2,8 @@
 --[[
   Writes a message in the default chat frame
 ]]
---local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
-local TRACE = function(msg)  end
+local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
+--local TRACE = function(msg)  end
 local ERROR = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
 
 
