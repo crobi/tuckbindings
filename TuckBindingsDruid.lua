@@ -15,6 +15,12 @@ local targets_focus =    {[""] = "target", ["SHIFT-"]="focus"}
 
 TB:Cast("BUTTON3",	"Barkskin")	
 
+
+TB:Macro("BUTTON5", 		"/script SetRaidTarget(\"target\", 8)") -- skull
+TB:Macro("SHIFT-BUTTON5", 	"/script SetRaidTarget(\"target\", 7)") -- cross
+TB:Macro("ALT-BUTTON5", 	"/script SetRaidTarget(\"target\", 5)") -- moon
+TB:Macro("CTRL-BUTTON5", 	"/script SetRaidTarget(\"target\", 1)") -- star
+
 -- Buffs
 TB:Cast("0", "Mark of the Wild",	nil, targets_selfcast)
 TB:Cast("9", "Thorns", 			nil, targets_selfcast)
@@ -53,13 +59,15 @@ TB:CastNoShapeshift("E", "Mangle", 			"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("E", "Mangle(Cat Form)", 		"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("E", "Moonfire", 			"harm", targets_focus, TB.human_form)
 
+TB:CastNoShapeshift("ALT-E", "Thrash", 			"harm", targets_focus, "Bear Form")
+
 TB:CastNoShapeshift("R", "Ravage", 			"stealth", targets_focus, "Cat Form")
 
 TB:CastNoShapeshift("R", "Maul", 				"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("R", "Shred", 				"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("R", "Entangling Roots", 		"harm", targets_focus, TB.human_form)
 
-TB:CastNoShapeshift("ALT-R", "Swipe", 			"harm", targets_focus, "Bear Form")
+TB:CastNoShapeshift("ALT-R", "Swipe(Bear Form)", 	"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("ALT-R", "Swipe(Cat Form)", 	"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("ALT-R", "Nature's Grasp", 	nil, "", TB.human_form)
 
