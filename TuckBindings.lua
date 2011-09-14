@@ -2,8 +2,9 @@
 --[[
   Writes a message in the default chat frame
 ]]
-local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
---local TRACE = function(msg)  end
+--local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
+local TRACE = function(msg)  end
+local INFO = function(msg)  ChatFrame1:AddMessage("TuckBindings: "..msg) end
 local ERROR = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
 
 
@@ -442,6 +443,6 @@ f:SetScript("OnEvent", function(self, event, ...)
 		ERROR("bindings for class "..player_class.." not found")
 	end
 
-	TRACE(""..TuckBindings.btn_count.." key bindings configured")
+	INFO(""..TuckBindings.btn_count.." key bindings configured")
 	
 end)
