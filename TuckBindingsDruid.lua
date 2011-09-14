@@ -99,7 +99,8 @@ TB:CastNoShapeshift("X", "Nature's Swiftness", 	nil,       targets_none,  caster
 
 TB:CastNoShapeshift("ALT-X", "Dash",			nil, targets_none , "Cat Form")
 
-TB:CastNoShapeshift("CTRL-X", "Stampeding Roar",	nil, targets_none, {"Cat Form", "Bear Form"})
+TB:CastNoShapeshift("CTRL-X", "Stampeding Roar(Bear Form)",	nil, targets_none, "Bear Form")
+TB:CastNoShapeshift("CTRL-X", "Stampeding Roar(Cat Form)",	nil, targets_none, "Cat Form")
 
 TB:Cast("ALT-F", "Tiger's Fury")
 
