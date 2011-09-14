@@ -422,9 +422,16 @@ local f = CreateFrame("Frame")
 
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+TuckBindings.initialized = false
 
 f:SetScript("OnEvent", function(self, event, ...)
 
+	if (event == "PLAYER_ENTERING_WORLD") then
+		TuckBindings.initialized = true
+	elseif (not TuckBindings.initialized) then
+		return
+	end
+	
 	-- clear old config
 	TuckBindings:ResetMacroButtons()
 	
