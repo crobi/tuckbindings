@@ -2,8 +2,8 @@
 --[[
   Writes a message in the default chat frame
 ]]
---local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
-local TRACE = function(msg)  end
+local TRACE = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
+--local TRACE = function(msg)  end
 local INFO = function(msg)  ChatFrame1:AddMessage("TuckBindings: "..msg) end
 local ERROR = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
 
@@ -11,7 +11,7 @@ local ERROR = function(msg) ChatFrame1:AddMessage("TuckBindings: "..msg) end
 --[[
   Global variables
 ]]
-TuckBindings = {btn_count = 0, buttons = {}, human_form = "" }
+TuckBindings = {btn_count = 0, buttons = {}, human_form = "", initialized = false}
 
 local TB = TuckBindings
 
@@ -53,13 +53,19 @@ end
 	spell: the item name or the number of the item slot
 	condition: the condition that all targets must meet
 	targets: target configuration, see MakeTargetConfig
+	items: items to equip before casting the spell
 ]]
-function TuckBindings:Cast(binding, spell, condition, targets)
+function TuckBindings:Cast(binding, spell, condition, targets, items)
 	local target_config = TB:MakeTargetConfig(targets, binding)
+	local condition_string = TB:ConcatenateConditions(condition)
+	local equip_string = TB:CreateItemEquipString(items, condition_string)
+	
 	for ibinding, itargets in pairs(target_config) do
-		local condition_string = TB:ConcatenateConditions(condition)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
+		if equip_string ~= "" then
+			TB:CreateMacroButton(ibinding, equip_string, true)
+		end
 		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell,true)
 	end
 end
@@ -71,14 +77,20 @@ end
 	condition: the condition that all targets must meet
 	targets: target configuration, see MakeTargetConfig
 	stances: all stances in which the spell should be cast
+	items: items to equip before casting the spell
 ]]
-function TuckBindings:CastNoShapeshift(binding, spell, condition, targets, stances)
+function TuckBindings:CastNoShapeshift(binding, spell, condition, targets, stances, items)
 	local target_config = TB:MakeTargetConfig(targets, binding)
+	local stance_string = TuckBindings:CreateStanceString(stances)
+	local condition_string = TB:ConcatenateConditions(condition, stance_string)
+	local equip_string = TB:CreateItemEquipString(items, condition_string)
+	
 	for ibinding, itargets in pairs(target_config) do
-		local stance_string = TuckBindings:CreateStanceString(stances)
-		local condition_string = TB:ConcatenateConditions(condition, stance_string)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
+		if equip_string ~= "" then
+			TB:CreateMacroButton(ibinding, equip_string, true)
+		end
 		TB:CreateMacroButton(ibinding, "/cast "..option_string..spell,true)
 	end
 end
@@ -90,23 +102,41 @@ end
 	condition: the condition that all targets must meet
 	targets: target configuration, see MakeTargetConfig
 	stances: all stances in which the spell should be cast. If the caster is not in any of these, he will change to the first in this list
+	items: items to equip before casting the spell
 ]]
-function TuckBindings:CastShapeshift(binding, spell, condition, targets, stances)
+function TuckBindings:CastShapeshift(binding, spell, condition, targets, stances, items)
 	local target_config = TB:MakeTargetConfig(targets, binding)
+	local cast_string = TB:CreateStanceSwitchCastString(stances)
+	local condition_string = TB:ConcatenateConditions(condition, nil)
+	local equip_string = TB:CreateItemEquipString(items, condition_string)
+	
 	for ibinding, itargets in pairs(target_config) do
-		local cast_string = TB:CreateStanceSwitchCastString(stances)
-		local condition_string = TB:ConcatenateConditions(condition, nil)
 		local option_string = TB:ConcatenateTargets(itargets, condition_string)
 		
+		if equip_string ~= "" then
+			TB:CreateMacroButton(ibinding, equip_string, true)
+		end
 		TB:CreateMacroButton(ibinding, cast_string..option_string..spell,true)
 	end
+end
+
+--[[
+	Creates a binding that equips an item
+	binding: the key binding
+	item: the name or ID of the item
+	stances: all stances in which the item should be equipped
+]]
+function TuckBindings:Equip(binding, item, stances)
+	local stance_string = TB:CreateStanceString(stances)
+	local item_string = TB:CreateItemString(item)
+	TB:CreateMacroButton(binding, "/equip ["..stance_string.."] "..item_string,true)
 end
 
 --[[
 	Creates a binding that swaps the current target and focus
 ]]
 function TuckBindings:SwapTargetFocus(binding)
-	TuckBindings:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget",true)
+	TB:CreateMacroButton(binding, "/cleartarget [@target, dead]\n/clearfocus [@focus, dead]\n/target focus\n/cleartarget [@focus, noexists]\n/targetlasttarget\n/focus target\n/targetlasttarget",true)
 end
 
 
@@ -324,6 +354,42 @@ function TuckBindings:CreateStanceSwitchCastString(stance)
 end
 
 --[[
+	Returns a string that is suitable for an "/equip" macro.
+	Input: name of ID of an item
+]]
+function TuckBindings:CreateItemString(item)
+	if type(item) == "number" then
+		return "item:"..item
+	else
+		return item
+	end
+end
+
+--[[
+	Returns a string contains multiple /equip commands, one for each input item
+	items: item or list of items
+	condition: condition for the equip command
+]]
+function TuckBindings:CreateItemEquipString(items, condition)
+	local condition_string = ""
+	if condition and condition ~= "" then
+		condition_string = "["..condition.."] "
+	end
+	local equip_string = ""
+	if type(items) == "table" then
+		for ci, cn in ipairs(items) do
+			if equip_string ~= "" then
+				equip_string = equip_string.."\n"
+			end
+			equip_string = equip_string.."/equip "..condition_string..TB:CreateItemString(cn)
+		end
+	elseif items then
+		equip_string = "/equip "..condition_string..TB:CreateItemString(items)
+	end
+	return equip_string
+end
+
+--[[
 
 ]]
 function TuckBindings:CreateMacroButton(binding, macrotext, add_to_existing)
@@ -377,7 +443,7 @@ function TuckBindings:HasMacroButton(binding)
 end
 
 --[[
-
+	Returns true if the player knows a given spell
 ]]
 function TuckBindings:HasSpell(name)
 	local i = 1
@@ -393,6 +459,44 @@ function TuckBindings:HasSpell(name)
 	   
 	   i = i + 1
 	end
+end
+
+--[[
+	Returns true if the player is in an arena
+]]
+function TuckBindings:IsInArena()
+	inInstance, instanceType = IsInInstance()
+	return inInstance and instanceType == "arena"
+end
+
+--[[
+	Returns true if the player is in a battleground
+]]
+function TuckBindings:IsInBattleground()
+	inInstance, instanceType = IsInInstance()
+	return inInstance and instanceType == "pvp"
+end
+
+--[[
+	Returns true if the player is in a raid instance
+]]
+function TuckBindings:IsInRaidInstance()
+	inInstance, instanceType = IsInInstance()
+	return inInstance and instanceType == "raid"
+end
+
+--[[
+	Returns true if the primary talents are active
+]]
+function TuckBindings:IsPrimaryTalentsActive()
+	return GetActiveTalentGroup() == 1
+end
+
+--[[
+	Returns true if the secondary talents are active
+]]
+function TuckBindings:IsSecondaryTalentsActive()
+	return GetActiveTalentGroup() == 2
 end
 
 --[[
@@ -422,7 +526,6 @@ local f = CreateFrame("Frame")
 
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-TuckBindings.initialized = false
 
 f:SetScript("OnEvent", function(self, event, ...)
 
