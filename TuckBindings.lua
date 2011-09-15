@@ -248,21 +248,25 @@ function TuckBindings:ConcatenateTargets(target, condition_string)
 	-- build macro string
 	local result_string = ""
 	for ti, target_string in pairs(tbl_targets) do
-		--if target_string ~= "target" then
+		if target_string ~= "" then
 			result_string = result_string.."[@"..target_string
-		--else
-		--	result_string = result_string.."["
-		--end
+		else
+			result_string = result_string.."["
+		end
 		if condition_string and condition_string ~= "" then
-			--if target_string ~= "target" then
+			if result_string ~= "[" then
 				result_string = result_string..","
-			--end
+			end
 			result_string = result_string..condition_string
 		end
 		result_string = result_string.."]"
 	end
 
-	return result_string
+	if result_string ~= "[]" then
+		return result_string
+	else
+		return ""
+	end
 end
 
 --[[
