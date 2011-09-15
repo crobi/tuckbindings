@@ -10,6 +10,14 @@ local targets_focus =    {[""] = "target", ["SHIFT-"]="focus"}
 local targets_none =    ""
 local caster_forms = {TB.human_form, "Tree of Life"}
 
+local melee_weapon = nil
+local caster_weapon = nil
+
+if TB:IsInArena() or TB:IsInBattleground() then
+	melee_weapon = 71361
+	caster_weapon = 61342
+end
+
 -- Forms
 --TB:Cast("CTRL-1", "Bear Form")
 --TB:Cast("CTRL-2", "Cat Form")
@@ -30,11 +38,11 @@ TB:Cast("0", "Mark of the Wild",	nil, targets_selfcast)
 TB:Cast("9", "Thorns", 			nil, targets_selfcast)
 
 -- Heal
-TB:Cast("2", "Regrowth",		nil, targets_selfcast)
-TB:Cast("3", "Wild Growth",		nil, targets_selfcast)
-TB:Cast("ALT-3", "Tranquility",	nil, targets_none)
-TB:Cast("4", "Healing Touch",		nil, targets_selfcast)
-TB:Cast("ALT-4", "Nourish",		nil, targets_selfcast)
+TB:Cast("2", "Regrowth",		nil, targets_selfcast, caster_weapon)
+TB:Cast("3", "Wild Growth",		nil, targets_selfcast, caster_weapon)
+TB:Cast("ALT-3", "Tranquility",	nil, targets_none,     caster_weapon)
+TB:Cast("4", "Healing Touch",		nil, targets_selfcast, caster_weapon)
+TB:Cast("ALT-4", "Nourish",		nil, targets_selfcast, caster_weapon)
 
 
 -- DMG
@@ -63,44 +71,43 @@ TB:Macro("E", "/startattack", true)
 
 TB:CastNoShapeshift("E", "Pounce", 			"stealth", targets_focus, "Cat Form")
 
-TB:CastNoShapeshift("E", "Mangle", 			"harm", targets_focus, "Bear Form")
-TB:CastNoShapeshift("E", "Mangle(Cat Form)", 		"harm", targets_focus, "Cat Form")
+TB:CastNoShapeshift("E", "Mangle", 			nil,       targets_focus, "Bear Form", melee_weapon)
+TB:CastNoShapeshift("E", "Mangle(Cat Form)", 		nil,       targets_focus, "Cat Form",  melee_weapon)
 TB:CastNoShapeshift("E", "Moonfire", 			"harm", targets_focus, TB.human_form)
 
 TB:CastNoShapeshift("ALT-E", "Thrash", 			nil,       targets_none, "Bear Form")
 
-TB:CastNoShapeshift("R", "Ravage", 			"stealth", targets_focus, "Cat Form")
+TB:CastNoShapeshift("R", "Ravage", 			"stealth", targets_focus, "Cat Form", melee_weapon)
 
-TB:CastNoShapeshift("R", "Maul", 				"harm", targets_focus, "Bear Form")
-TB:CastNoShapeshift("R", "Shred", 				"harm", targets_focus, "Cat Form")
-TB:CastNoShapeshift("R", "Entangling Roots", 		"harm", targets_focus, TB.human_form)
+TB:CastNoShapeshift("R", "Maul", 				nil,       targets_focus, "Bear Form", melee_weapon)
+TB:CastNoShapeshift("R", "Shred", 				nil,       targets_focus, "Cat Form",  melee_weapon)
+TB:CastNoShapeshift("R", "Entangling Roots", 		nil,       targets_focus, TB.human_form)
 
-TB:CastNoShapeshift("ALT-R", "Swipe(Bear Form)", 	nil,       targets_none, "Bear Form")
-TB:CastNoShapeshift("ALT-R", "Swipe(Cat Form)", 	nil,       targets_none, "Cat Form")
+TB:CastNoShapeshift("ALT-R", "Swipe(Bear Form)", 	nil,       targets_none, "Bear Form", melee_weapon)
+TB:CastNoShapeshift("ALT-R", "Swipe(Cat Form)", 	nil,       targets_none, "Cat Form",  melee_weapon)
 
-TB:CastNoShapeshift("CTRL-X", "Ravage", 		"harm", targets_focus, "Cat Form")
+TB:CastNoShapeshift("CTRL-X", "Ravage", 		nil,       targets_focus, "Cat Form", melee_weapon)
 
 TB:CastNoShapeshift("F", "Growl", 				"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("F", "Cower", 				"harm", targets_focus, "Cat Form")
 TB:CastNoShapeshift("F", "Remove Corruption",		"help",  targets_selfcast, TB.human_form)
 
 TB:CastNoShapeshift("C", "Demoralizing Roar", 		nil, nil, "Bear Form")
-TB:CastNoShapeshift("C", "Ferocious Bite", 		"harm", targets_focus, "Cat Form")
-TB:CastNoShapeshift("C", "Rejuvenation", 		"help",  targets_selfcast, caster_forms)
+TB:CastNoShapeshift("C", "Ferocious Bite", 		nil, targets_focus, "Cat Form", melee_weapon)
+TB:CastNoShapeshift("C", "Rejuvenation", 		nil,  targets_selfcast, caster_forms, caster_weapon)
 
 TB:CastNoShapeshift("ALT-C", "Maim",			"harm", targets_focus, "Cat Form")
-TB:CastNoShapeshift("ALT-C", "Swiftmend", 		"help",  targets_selfcast, caster_forms)
+TB:CastNoShapeshift("ALT-C", "Swiftmend", 		"help",  targets_selfcast, caster_forms, caster_weapon)
 
 TB:CastNoShapeshift("CTRL-C", "Savage Roar",		"harm", targets_focus, "Cat Form")
 
-TB:CastNoShapeshift("X", "Feral Charge", 		"harm", targets_focus, "Bear Form")
-TB:CastNoShapeshift("X", "Feral Charge(Cat Form)",	"harm", targets_focus, "Cat Form")
-TB:CastNoShapeshift("X", "Nature's Swiftness", 	nil,       targets_none,  caster_forms)
+TB:CastNoShapeshift("X", "Feral Charge", 		nil, targets_focus, "Bear Form")
+TB:CastNoShapeshift("X", "Feral Charge(Cat Form)",	nil, targets_focus, "Cat Form")
+TB:CastNoShapeshift("X", "Nature's Swiftness", 	nil, targets_none,  caster_forms)
 
 TB:CastNoShapeshift("ALT-X", "Dash",			nil, targets_none , "Cat Form")
 
-TB:CastNoShapeshift("CTRL-X", "Stampeding Roar(Bear Form)",	nil, targets_none, "Bear Form")
-TB:CastNoShapeshift("CTRL-X", "Stampeding Roar(Cat Form)",	nil, targets_none, "Cat Form")
+TB:CastNoShapeshift("CTRL-X", "Stampeding Roar",	nil, targets_none, {"Cat Form", "Bear Form"})
 
 TB:Cast("ALT-F", "Tiger's Fury")
 
@@ -108,14 +115,13 @@ TB:Macro("CTRL-F", "/use 13")
 TB:CastNoShapeshift("CTRL-F", "Tiger's Fury", 		nil, targets_focus, "Cat Form")
 TB:CastNoShapeshift("CTRL-F", "Berserk", 		nil, targets_focus, {"Cat Form", "Bear Form"})
 
-TB:CastNoShapeshift("V", "Lacerate", 			"harm", targets_focus, "Bear Form")
-TB:CastNoShapeshift("V", "Rake", 				"harm", targets_focus, "Cat Form")
-TB:CastNoShapeshift("V", "Lifebloom",  			"help",  targets_selfcast, caster_forms)
+TB:CastNoShapeshift("V", "Lacerate", 			nil, targets_focus, "Bear Form", melee_weapon)
+TB:CastNoShapeshift("V", "Rake", 				nil, targets_focus, "Cat Form", melee_weapon)
+TB:CastNoShapeshift("V", "Lifebloom",  			nil,  targets_selfcast, caster_forms, caster_weapon)
 
-TB:CastNoShapeshift("ALT-V", "Rip", 			"harm", targets_focus, "Cat Form")
-TB:CastNoShapeshift("ALT-V", "Pulverize", 		"harm", targets_focus, "Bear Form")
+TB:CastNoShapeshift("ALT-V", "Rip", 			nil, targets_focus, "Cat Form",  melee_weapon)
+TB:CastNoShapeshift("ALT-V", "Pulverize", 		nil, targets_focus, "Bear Form", melee_weapon)
 
 
 
 end
-
