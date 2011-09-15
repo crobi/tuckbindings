@@ -86,7 +86,7 @@ TB:CastNoShapeshift("R", "Entangling Roots", 		nil,       targets_focus, TB.huma
 TB:CastNoShapeshift("ALT-R", "Swipe(Bear Form)", 	nil,       targets_none, "Bear Form", melee_weapon)
 TB:CastNoShapeshift("ALT-R", "Swipe(Cat Form)", 	nil,       targets_none, "Cat Form",  melee_weapon)
 
-TB:CastNoShapeshift("CTRL-X", "Ravage", 		nil,       targets_focus, "Cat Form", melee_weapon)
+TB:CastNoShapeshift("CTRL-R", "Ravage", 		nil,       targets_focus, "Cat Form", melee_weapon)
 
 TB:CastNoShapeshift("F", "Growl", 				"harm", targets_focus, "Bear Form")
 TB:CastNoShapeshift("F", "Cower", 				"harm", targets_focus, "Cat Form")
@@ -105,9 +105,12 @@ TB:CastNoShapeshift("X", "Feral Charge", 		nil, targets_focus, "Bear Form")
 TB:CastNoShapeshift("X", "Feral Charge(Cat Form)",	nil, targets_focus, "Cat Form")
 TB:CastNoShapeshift("X", "Nature's Swiftness", 	nil, targets_none,  caster_forms)
 
+TB:Macro("ALT-X", "/cancelaura Stampeding Roar")
 TB:CastNoShapeshift("ALT-X", "Dash",			nil, targets_none , "Cat Form")
 
-TB:CastNoShapeshift("CTRL-X", "Stampeding Roar",	nil, targets_none, {"Cat Form", "Bear Form"})
+TB:Macro("CTRL-X", "/cancelaura Dash")
+TB:CastNoShapeshift("CTRL-X", " Stampeding Roar(Bear Form)",	nil, targets_none, "Bear Form")
+TB:CastNoShapeshift("CTRL-X", " Stampeding Roar(Cat Form)",	nil, targets_none, "Cat Form")
 
 TB:Cast("ALT-F", "Tiger's Fury")
 
